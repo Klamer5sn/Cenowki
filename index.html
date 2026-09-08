@@ -260,6 +260,10 @@ Magnetyczna opaska na śrubki - 14.90 zł" rows="6"></textarea>
 <span class="text-slate-200 font-semibold">Cena w belkach PNG</span>
 <span class="flex items-center gap-2 text-violet-300 font-bold"><input checked id="showVideoPrice" type="checkbox" class="accent-violet-500 w-4 h-4" oninput="updateConfig()"/> Pokaż</span>
 </label>
+<label class="flex items-center justify-between gap-3 text-xs bg-slate-950 p-3 rounded-xl border border-slate-800 cursor-pointer hover:border-violet-500 transition">
+<span class="text-slate-200 font-semibold">Napis „CENA” nad kwotą</span>
+<span class="flex items-center gap-2 text-violet-300 font-bold"><input checked id="showVideoPriceLabel" type="checkbox" class="accent-violet-500 w-4 h-4" oninput="updateConfig()"/> Pokaż</span>
+</label>
 <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-3">
 <div class="text-[11px] uppercase tracking-wide font-bold text-violet-300">Teksty</div>
 <div>
@@ -2579,6 +2583,7 @@ TOP 1 | Airfryer Bites | 14,99 zł | hit tygodnia`
             const fontFamily = getPrimaryFontFamily();
             const theme = getCanvasVideoTheme(currentTheme);
             const showVideoPrice = document.getElementById('showVideoPrice').checked;
+            const showVideoPriceLabel = document.getElementById('showVideoPriceLabel')?.checked !== false;
 
             const barWidth = parseInt(document.getElementById('videoBarWidth').value || '840', 10);
             const barHeight = parseInt(document.getElementById('videoBarHeight').value || '128', 10);
@@ -2660,18 +2665,24 @@ TOP 1 | Airfryer Bites | 14,99 zł | hit tygodnia`
                 const fittedPriceSize = fitCanvasTextSize(ctx, item.price, fontFamily, priceSize, priceTextMaxWidth, 10, 900);
                 const fittedLabelSize = fitCanvasTextSize(ctx, 'CENA', fontFamily, labelSize, Math.max(30, priceWidth - 8), 8, 800);
                 const priceX = barWidth - padding - priceWidth;
-                const priceBoxHeight = Math.max(56, Math.round(fittedPriceSize * 1.8));
-                const labelBlockHeight = fittedLabelSize + 10;
+                const maxPriceBoxHeight = Math.max(36, baseHeight - padding * 2);
+                const priceBoxHeight = Math.min(maxPriceBoxHeight, Math.max(56, Math.round(fittedPriceSize * 1.8)));
+                const labelBlockHeight = showVideoPriceLabel ? fittedLabelSize + 10 : 0;
                 const totalPriceHeight = labelBlockHeight + priceBoxHeight;
-                const labelTop = Math.max(padding, (baseHeight - totalPriceHeight) / 2);
-                const labelY = labelTop + fittedLabelSize;
-                ctx.fillStyle = theme.labelText;
-                ctx.font = `800 ${fittedLabelSize}px ${fontFamily}`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'alphabetic';
-                ctx.fillText('CENA', priceX + priceWidth / 2, labelY);
+                const groupTop = Math.max(0, (baseHeight - totalPriceHeight) / 2);
 
-                const priceBoxY = labelTop + labelBlockHeight;
+                if (showVideoPriceLabel) {
+                    const labelY = groupTop + fittedLabelSize;
+                    ctx.fillStyle = theme.labelText;
+                    ctx.font = `800 ${fittedLabelSize}px ${fontFamily}`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'alphabetic';
+                    ctx.fillText('CENA', priceX + priceWidth / 2, labelY);
+                }
+
+                const priceBoxY = showVideoPriceLabel
+                    ? groupTop + labelBlockHeight
+                    : (baseHeight - priceBoxHeight) / 2;
                 const priceRadius = Math.min(20, Math.round(priceBoxHeight / 2));
 
                 ctx.fillStyle = theme.priceBg;
@@ -2695,20 +2706,22 @@ TOP 1 | Airfryer Bites | 14,99 zł | hit tygodnia`
         }
 
         async function downloadSingleOverlay(elementId, filename) {
-            const el = document.getElementById(elementId);
-            if (!el) {
-                console.error('Nie znaleziono elementu do eksportu:', elementId);
-                return false;
-            }
-
             try {
                 const canvas = await renderOverlayToCanvas(elementId);
+                const blob = await new Promise((resolve, reject) => {
+                    canvas.toBlob(result => {
+                        if (result) resolve(result);
+                        else reject(new Error('Nie udało się utworzyć PNG.'));
+                    }, 'image/png');
+                });
+                const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.download = filename;
-                link.href = canvas.toDataURL('image/png');
+                link.href = url;
                 document.body.appendChild(link);
                 link.click();
                 link.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
                 return true;
             } catch (error) {
                 console.error('Błąd podczas generowania PNG:', error);
