@@ -179,6 +179,10 @@
 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
                     Grafiki na wideo (PNG)
                 </button>
+<button class="px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-2" id="tabBtnCustom" onclick="switchTab('custom')">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h16" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+                    Kreator belek
+                </button>
 </div>
 <div class="flex items-center gap-2.5">
 <button class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-900/30 transition flex items-center gap-2" onclick="printA4()">
@@ -282,6 +286,10 @@ Magnetyczna opaska na śrubki - 14.90 zł" rows="6"></textarea>
 <div>
 <div class="flex justify-between text-slate-300 mb-1"><span>Szerokość całej belki:</span><span class="text-violet-300 font-mono font-bold" id="videoBarWidthVal">840 px</span></div>
 <input class="w-full accent-violet-500 cursor-pointer" id="videoBarWidth" max="1100" min="420" oninput="updateConfig()" step="10" type="range" value="840"/>
+</div>
+<div>
+<div class="flex justify-between text-slate-300 mb-1"><span>Wysokość całej belki:</span><span class="text-violet-300 font-mono font-bold" id="videoBarHeightVal">128 px</span></div>
+<input class="w-full accent-violet-500 cursor-pointer" id="videoBarHeight" max="300" min="90" oninput="updateConfig()" step="2" type="range" value="128"/>
 </div>
 <div class="grid grid-cols-2 gap-3">
 <div>
@@ -446,6 +454,105 @@ Magnetyczna opaska na śrubki - 14.90 zł" rows="6"></textarea>
 
 
 
+<div class="tool-panel-custom hidden bg-slate-900 border border-fuchsia-500/40 rounded-2xl p-5 shadow-xl space-y-4" id="customDataPanel">
+<div class="flex items-center justify-between">
+<h2 class="font-bold text-sm tracking-wide text-fuchsia-300 uppercase flex items-center gap-2">
+<span>🧩</span> 4. Dane do własnych belek
+</h2>
+<span class="text-[11px] bg-fuchsia-950 text-fuchsia-300 px-2 py-0.5 rounded-md border border-fuchsia-800" id="customItemCountBadge">4 belki</span>
+</div>
+<p class="text-[11px] text-slate-400">Każda linia to jedna belka. Format: <strong>etykieta | tytuł | prawa wartość | dolny opis</strong></p>
+<textarea id="customRawInput" oninput="parseCustomBars()" rows="6" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3.5 text-xs font-mono text-slate-200 focus:ring-2 focus:ring-fuchsia-500 focus:outline-none transition leading-relaxed" placeholder="PRZEPIS | Lody proteinowe | 320 kcal | 24 g białka
+PRZEPIS | Omlet z twarogiem | 410 kcal | 31 g białka"></textarea>
+<div class="grid grid-cols-2 gap-2">
+<button class="text-xs py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition font-medium" onclick="loadCustomDemoData('recipes')">Demo przepisy</button>
+<button class="text-xs py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition font-medium" onclick="loadCustomDemoData('macro')">Demo makro</button>
+<button class="text-xs py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition font-medium" onclick="loadCustomDemoData('generic')">Demo uniwersalne</button>
+<button class="text-xs py-2 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 rounded-lg transition font-medium border border-rose-900/50" onclick="clearCustomInput()">Wyczyść</button>
+</div>
+</div>
+
+<div class="tool-panel-custom hidden bg-slate-900 border border-fuchsia-500/40 rounded-2xl p-5 shadow-xl space-y-4" id="customPresetPanel">
+<div class="flex items-center justify-between">
+<h2 class="font-bold text-sm tracking-wide text-fuchsia-300 uppercase flex items-center gap-2">
+<span>🎨</span> 5. Presety i szablony
+</h2>
+<span class="text-[11px] bg-fuchsia-950 text-fuchsia-300 px-2 py-0.5 rounded-md border border-fuchsia-800">Zapisywanie szablonów</span>
+</div>
+<div class="grid grid-cols-3 gap-2 text-xs">
+<button class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl transition font-semibold" onclick="setCustomPreset('recipe')">Przepis</button>
+<button class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl transition font-semibold" onclick="setCustomPreset('macro')">Makro</button>
+<button class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl transition font-semibold" onclick="setCustomPreset('generic')">Uniwersalny</button>
+</div>
+<div class="grid grid-cols-1 gap-2">
+<input id="customTemplateName" type="text" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:ring-2 focus:ring-fuchsia-500 focus:outline-none" placeholder="Nazwa własnego szablonu" />
+<div class="grid grid-cols-2 gap-2">
+<button class="px-3 py-2 bg-fuchsia-600 hover:bg-fuchsia-500 text-white rounded-xl transition font-semibold text-xs" onclick="saveCustomTemplate()">Zapisz szablon</button>
+<button class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl transition font-semibold text-xs" onclick="deleteSelectedCustomTemplate()">Usuń szablon</button>
+</div>
+<select id="customTemplateSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:ring-2 focus:ring-fuchsia-500 focus:outline-none"></select>
+<button class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl transition font-semibold text-xs" onclick="loadSelectedCustomTemplate()">Wczytaj zaznaczony szablon</button>
+<div class="grid grid-cols-2 gap-2">
+<button class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl transition font-semibold text-xs" onclick="exportCustomTemplateSettings()">Eksportuj szablon</button>
+<button class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl transition font-semibold text-xs" onclick="triggerImportCustomTemplateSettings()">Wczytaj szablon</button>
+</div>
+<input id="customTemplateFile" type="file" accept="application/json,.json" style="display:none" onchange="handleImportCustomTemplateSettings(event)" />
+</div>
+</div>
+
+<div class="tool-panel-custom hidden bg-slate-900 border border-fuchsia-500/40 rounded-2xl p-5 shadow-xl space-y-4" id="customAppearancePanel">
+<div class="flex items-center justify-between">
+<h2 class="font-bold text-sm tracking-wide text-fuchsia-300 uppercase flex items-center gap-2">
+<span>⚙️</span> 6. Ustawienia własnych belek
+</h2>
+<span class="text-[11px] bg-fuchsia-950 text-fuchsia-300 px-2 py-0.5 rounded-md border border-fuchsia-800">Dużo opcji</span>
+</div>
+<div class="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-3">
+<div class="text-[11px] uppercase tracking-wide font-bold text-fuchsia-300">Układ</div>
+<div class="grid grid-cols-2 gap-3">
+<div><div class="flex justify-between text-slate-300 mb-1"><span>Szerokość belki</span><span class="text-fuchsia-300 font-mono font-bold" id="customBarWidthVal">920 px</span></div><input id="customBarWidth" type="range" min="420" max="1400" step="10" value="920" oninput="updateCustomControls()" class="w-full accent-fuchsia-500 cursor-pointer"/></div>
+<div><div class="flex justify-between text-slate-300 mb-1"><span>Wysokość belki i eksportu</span><span class="text-fuchsia-300 font-mono font-bold" id="customBarHeightVal">160 px</span></div><input id="customBarHeight" type="range" min="90" max="280" step="5" value="160" oninput="updateCustomControls()" class="w-full accent-fuchsia-500 cursor-pointer"/></div>
+<div><div class="flex justify-between text-slate-300 mb-1"><span>Padding poziomy</span><span class="text-fuchsia-300 font-mono font-bold" id="customPaddingXVal">24 px</span></div><input id="customPaddingX" type="range" min="8" max="60" step="1" value="24" oninput="updateCustomControls()" class="w-full accent-fuchsia-500 cursor-pointer"/></div>
+<div><div class="flex justify-between text-slate-300 mb-1"><span>Padding pionowy</span><span class="text-fuchsia-300 font-mono font-bold" id="customPaddingYVal">20 px</span></div><input id="customPaddingY" type="range" min="8" max="50" step="1" value="20" oninput="updateCustomControls()" class="w-full accent-fuchsia-500 cursor-pointer"/></div>
+<div><div class="flex justify-between text-slate-300 mb-1"><span>Zaokrąglenie</span><span class="text-fuchsia-300 font-mono font-bold" id="customRadiusVal">22 px</span></div><input id="customRadius" type="range" min="0" max="50" step="1" value="22" oninput="updateCustomControls()" class="w-full accent-fuchsia-500 cursor-pointer"/></div>
+<div><div class="flex justify-between text-slate-300 mb-1"><span>Odstęp sekcji</span><span class="text-fuchsia-300 font-mono font-bold" id="customGapVal">16 px</span></div><input id="customGap" type="range" min="0" max="40" step="1" value="16" oninput="updateCustomControls()" class="w-full accent-fuchsia-500 cursor-pointer"/></div>
+<div><div class="flex justify-between text-slate-300 mb-1"><span>Szerokość tagu</span><span class="text-fuchsia-300 font-mono font-bold" id="customChipWidthVal">150 px</span></div><input id="customChipWidth" type="range" min="70" max="280" step="5" value="150" oninput="updateCustomControls()" class="w-full accent-fuchsia-500 cursor-pointer"/></div>
+<div><div class="flex justify-between text-slate-300 mb-1"><span>Szerokość prawej kolumny</span><span class="text-fuchsia-300 font-mono font-bold" id="customRightWidthVal">180 px</span></div><input id="customRightWidth" type="range" min="0" max="360" step="5" value="180" oninput="updateCustomControls()" class="w-full accent-fuchsia-500 cursor-pointer"/></div>
+</div>
+<div class="grid grid-cols-2 gap-2 text-xs">
+<label class="flex items-center gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800"><input id="customShowValue" type="checkbox" checked oninput="updateCustomControls()" class="accent-fuchsia-500"/>Pokaż prawą wartość</label>
+<label class="flex items-center gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800"><input id="customShowSubtitle" type="checkbox" checked oninput="updateCustomControls()" class="accent-fuchsia-500"/>Pokaż dolny opis</label>
+<label class="flex items-center gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800"><input id="customShowValueLabel" type="checkbox" checked oninput="updateCustomControls()" class="accent-fuchsia-500"/>Pokaż etykietę po prawej</label>
+<label class="flex items-center gap-2 bg-slate-900 p-2 rounded-xl border border-slate-800"><input id="customShowChip" type="checkbox" checked oninput="updateCustomControls()" class="accent-fuchsia-500"/>Pokaż tag po lewej</label>
+</div>
+<input id="customValueLabelText" type="text" value="WARTOŚĆ" oninput="updateCustomControls()" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:ring-2 focus:ring-fuchsia-500 focus:outline-none" placeholder="Tekst etykiety po prawej" />
+</div>
+<div class="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-3">
+<div class="text-[11px] uppercase tracking-wide font-bold text-fuchsia-300">Teksty</div>
+<div class="grid grid-cols-2 gap-3">
+<div><div class="flex justify-between text-slate-300 mb-1"><span>Tytuł</span><span class="text-fuchsia-300 font-mono font-bold" id="customTitleSizeVal">34 px</span></div><input id="customTitleSize" type="range" min="12" max="72" step="1" value="34" oninput="updateCustomControls()" class="w-full accent-fuchsia-500 cursor-pointer"/></div>
+<div><div class="flex justify-between text-slate-300 mb-1"><span>Prawa wartość</span><span class="text-fuchsia-300 font-mono font-bold" id="customValueSizeVal">30 px</span></div><input id="customValueSize" type="range" min="10" max="72" step="1" value="30" oninput="updateCustomControls()" class="w-full accent-fuchsia-500 cursor-pointer"/></div>
+<div><div class="flex justify-between text-slate-300 mb-1"><span>Tag</span><span class="text-fuchsia-300 font-mono font-bold" id="customChipTextSizeVal">12 px</span></div><input id="customChipTextSize" type="range" min="8" max="30" step="1" value="12" oninput="updateCustomControls()" class="w-full accent-fuchsia-500 cursor-pointer"/></div>
+<div><div class="flex justify-between text-slate-300 mb-1"><span>Etykieta prawej kolumny</span><span class="text-fuchsia-300 font-mono font-bold" id="customValueLabelSizeVal">10 px</span></div><input id="customValueLabelSize" type="range" min="8" max="24" step="1" value="10" oninput="updateCustomControls()" class="w-full accent-fuchsia-500 cursor-pointer"/></div>
+<div class="col-span-2"><div class="flex justify-between text-slate-300 mb-1"><span>Dolny opis</span><span class="text-fuchsia-300 font-mono font-bold" id="customSubtitleSizeVal">16 px</span></div><input id="customSubtitleSize" type="range" min="8" max="36" step="1" value="16" oninput="updateCustomControls()" class="w-full accent-fuchsia-500 cursor-pointer"/></div>
+</div>
+</div>
+<div class="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-3">
+<div class="text-[11px] uppercase tracking-wide font-bold text-fuchsia-300">Kolory</div>
+<div class="grid grid-cols-2 gap-3 text-xs">
+<label class="space-y-1 text-slate-300"><span>Tło start</span><input id="customBg1" type="color" value="#111827" oninput="updateCustomControls()" class="w-full h-10 bg-slate-900 border border-slate-800 rounded-lg p-1"/></label>
+<label class="space-y-1 text-slate-300"><span>Tło koniec</span><input id="customBg2" type="color" value="#7c3aed" oninput="updateCustomControls()" class="w-full h-10 bg-slate-900 border border-slate-800 rounded-lg p-1"/></label>
+<label class="space-y-1 text-slate-300"><span>Tło tagu</span><input id="customChipBg" type="color" value="#fbbf24" oninput="updateCustomControls()" class="w-full h-10 bg-slate-900 border border-slate-800 rounded-lg p-1"/></label>
+<label class="space-y-1 text-slate-300"><span>Kolor tagu</span><input id="customChipColor" type="color" value="#111827" oninput="updateCustomControls()" class="w-full h-10 bg-slate-900 border border-slate-800 rounded-lg p-1"/></label>
+<label class="space-y-1 text-slate-300"><span>Kolor tytułu</span><input id="customTitleColor" type="color" value="#ffffff" oninput="updateCustomControls()" class="w-full h-10 bg-slate-900 border border-slate-800 rounded-lg p-1"/></label>
+<label class="space-y-1 text-slate-300"><span>Kolor opisu</span><input id="customSubtitleColor" type="color" value="#e5e7eb" oninput="updateCustomControls()" class="w-full h-10 bg-slate-900 border border-slate-800 rounded-lg p-1"/></label>
+<label class="space-y-1 text-slate-300"><span>Tło wartości</span><input id="customValueBg" type="color" value="#ffffff" oninput="updateCustomControls()" class="w-full h-10 bg-slate-900 border border-slate-800 rounded-lg p-1"/></label>
+<label class="space-y-1 text-slate-300"><span>Kolor wartości</span><input id="customValueColor" type="color" value="#111827" oninput="updateCustomControls()" class="w-full h-10 bg-slate-900 border border-slate-800 rounded-lg p-1"/></label>
+<label class="space-y-1 text-slate-300"><span>Kolor etykiety po prawej</span><input id="customValueLabelColor" type="color" value="#cbd5e1" oninput="updateCustomControls()" class="w-full h-10 bg-slate-900 border border-slate-800 rounded-lg p-1"/></label>
+<label class="space-y-1 text-slate-300"><span>Obramowanie wartości</span><input id="customValueBorder" type="color" value="#e5e7eb" oninput="updateCustomControls()" class="w-full h-10 bg-slate-900 border border-slate-800 rounded-lg p-1"/></label>
+</div>
+</div>
+</div>
 </div>
 <div class="lg:col-span-8">
 <div class="space-y-4" id="printTabView">
@@ -1192,6 +1299,21 @@ Magnetyczna opaska na śrubki - 14.90 zł" rows="6"></textarea>
 </div>
 </div>
 </div>
+<div class="space-y-4 hidden" id="customTabView">
+<div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 no-print">
+<div class="flex flex-wrap items-center justify-between gap-4">
+<div>
+<h3 class="font-bold text-sm text-white flex items-center gap-2">🧩 Własne belki i szablony PNG</h3>
+<p class="text-xs text-slate-400 mt-1">Twórz osobne belki do przepisów, makro, promocji i innych formatów. Każdą możesz pobrać jako PNG albo wszystkie naraz w ZIP.</p>
+</div>
+<button class="px-4 py-2.5 bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-fuchsia-500/20 transition flex items-center gap-2" id="btnDownloadAllCustom" onclick="downloadAllCustomBars()">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+Pobierz wszystkie belki (ZIP)
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 gap-4" id="customBarsGrid"></div>
+</div>
 </div>
 </main>
 <script>
@@ -1211,7 +1333,13 @@ Wiertła stopniowe stożkowe HSS (3 szt.) - 19,90 zł
 Przenośna pompka elektryczna USB - 37,00 zł
 Zestaw ścisków stolarskich szybkomocujących - 15,99 zł`;
 
+        const defaultCustomData = `PRZEPIS | Lody proteinowe | 320 kcal | 24 g białka
+PRZEPIS | Omlet twarogowy | 410 kcal | 31 g białka
+MAKRO | Białko | 24 g | na porcję
+INFO | Czas przygotowania | 15 min | porcja dla 2 osób`;
+
         let items = [];
+        let customItems = [];
         let currentTheme = 'minimal_light';
 
         const themes = {
@@ -1309,8 +1437,14 @@ Zestaw ścisków stolarskich szybkomocujących - 15,99 zł`;
         };
 
         window.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('rawInput').value = defaultData;
+            const rawInput = document.getElementById('rawInput');
+            const customRawInput = document.getElementById('customRawInput');
+            if (rawInput) rawInput.value = defaultData;
+            if (customRawInput) customRawInput.value = defaultCustomData;
+
             parseAndRender();
+            if (customRawInput) parseCustomBars();
+            refreshCustomTemplateSelect();
             setTheme('minimal_light');
             updatePrintDimensionLabels();
             updateConfig();
@@ -1349,24 +1483,36 @@ Zestaw ścisków stolarskich szybkomocujących - 15,99 zł`;
             document.querySelectorAll('.tool-panel-video').forEach(panel => {
                 panel.classList.toggle('hidden', tab !== 'video');
             });
+            document.querySelectorAll('.tool-panel-custom').forEach(panel => {
+                panel.classList.toggle('hidden', tab !== 'custom');
+            });
         }
 
         function switchTab(tab) {
             const printTab = document.getElementById('printTabView');
             const videoTab = document.getElementById('videoTabView');
+            const customTab = document.getElementById('customTabView');
             const btnPrint = document.getElementById('tabBtnPrint');
             const btnVideo = document.getElementById('tabBtnVideo');
+            const btnCustom = document.getElementById('tabBtnCustom');
+
+            printTab.classList.add('hidden');
+            videoTab.classList.add('hidden');
+            customTab.classList.add('hidden');
+
+            btnPrint.className = 'px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-2';
+            btnVideo.className = 'px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-2';
+            btnCustom.className = 'px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-2';
 
             if (tab === 'print') {
                 printTab.classList.remove('hidden');
-                videoTab.classList.add('hidden');
                 btnPrint.className = 'px-4 py-2 rounded-lg bg-blue-600 text-white shadow-sm transition-all flex items-center gap-2';
-                btnVideo.className = 'px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-2';
-            } else {
-                printTab.classList.add('hidden');
+            } else if (tab === 'video') {
                 videoTab.classList.remove('hidden');
                 btnVideo.className = 'px-4 py-2 rounded-lg bg-indigo-600 text-white shadow-sm transition-all flex items-center gap-2';
-                btnPrint.className = 'px-4 py-2 rounded-lg text-slate-400 hover:text-white transition-all flex items-center gap-2';
+            } else {
+                customTab.classList.remove('hidden');
+                btnCustom.className = 'px-4 py-2 rounded-lg bg-fuchsia-600 text-white shadow-sm transition-all flex items-center gap-2';
             }
 
             updateVisibleToolPanels(tab);
@@ -1530,6 +1676,7 @@ Zestaw ścisków stolarskich szybkomocujących - 15,99 zł`;
                 videoCardRadius: document.getElementById('videoCardRadius').value,
                 videoPriceMinWidth: document.getElementById('videoPriceMinWidth').value,
                 videoBarWidth: document.getElementById('videoBarWidth').value,
+                videoBarHeight: document.getElementById('videoBarHeight').value,
                 videoLeftWidth: document.getElementById('videoLeftWidth').value,
                 videoBadgeWidth: document.getElementById('videoBadgeWidth').value,
                 videoSectionGap: document.getElementById('videoSectionGap').value
@@ -1547,6 +1694,7 @@ Zestaw ścisków stolarskich szybkomocujących - 15,99 zł`;
                 videoCardRadius: 'videoCardRadius',
                 videoPriceMinWidth: 'videoPriceMinWidth',
                 videoBarWidth: 'videoBarWidth',
+                videoBarHeight: 'videoBarHeight',
                 videoLeftWidth: 'videoLeftWidth',
                 videoBadgeWidth: 'videoBadgeWidth',
                 videoSectionGap: 'videoSectionGap'
@@ -1656,6 +1804,7 @@ Zestaw ścisków stolarskich szybkomocujących - 15,99 zł`;
             const videoRadius = document.getElementById('videoCardRadius').value;
             const videoPriceWidth = document.getElementById('videoPriceMinWidth').value;
             const videoBarWidth = document.getElementById('videoBarWidth').value;
+            const videoBarHeight = document.getElementById('videoBarHeight').value;
             const videoLeftWidth = document.getElementById('videoLeftWidth').value;
             const videoBadgeWidth = document.getElementById('videoBadgeWidth').value;
             const videoGap = document.getElementById('videoSectionGap').value;
@@ -1672,11 +1821,14 @@ Zestaw ścisków stolarskich szybkomocujących - 15,99 zł`;
             document.getElementById('videoRadiusVal').textContent = videoRadius + ' px';
             document.getElementById('videoPriceWidthVal').textContent = videoPriceWidth + ' px';
             document.getElementById('videoBarWidthVal').textContent = videoBarWidth + ' px';
+            document.getElementById('videoBarHeightVal').textContent = videoBarHeight + ' px';
             document.getElementById('videoLeftWidthVal').textContent = videoLeftWidth + ' px';
             document.getElementById('videoBadgeWidthVal').textContent = videoBadgeWidth + ' px';
             document.getElementById('videoGapVal').textContent = videoGap + ' px';
+            updateCustomControlsValues();
 
             renderAll();
+            renderCustomBars();
         }
 
         function renderAll() {
@@ -1702,6 +1854,7 @@ Zestaw ścisków stolarskich szybkomocujących - 15,99 zł`;
             const videoCardRadius = document.getElementById('videoCardRadius').value || 16;
             const videoPriceMinWidth = document.getElementById('videoPriceMinWidth').value || 130;
             const videoBarWidth = document.getElementById('videoBarWidth').value || 840;
+            const videoBarHeight = document.getElementById('videoBarHeight').value || 128;
             const videoLeftWidth = document.getElementById('videoLeftWidth').value || 560;
             const videoBadgeWidth = document.getElementById('videoBadgeWidth').value || 130;
             const videoSectionGap = document.getElementById('videoSectionGap').value || 8;
@@ -1807,30 +1960,439 @@ Zestaw ścisków stolarskich szybkomocujących - 15,99 zł`;
                         </div>
 
                         <div class="overlay-preview-box p-3 rounded-xl flex items-center justify-start overflow-x-auto">
-                            <div id="${cardId}" class="video-overlay-card shadow-2xl flex items-center justify-between" style="background: ${theme.videoCard}; padding: ${videoCardPadding}px; border-radius: ${videoCardRadius}px; width: ${videoBarWidth}px; gap: ${showVideoPrice ? videoSectionGap : 0}px;">
-                                <div class="video-overlay-main" style="width: ${showVideoPrice ? videoLeftWidth : (videoBarWidth - (videoCardPadding * 2))}px; max-width: ${showVideoPrice ? videoLeftWidth : (videoBarWidth - (videoCardPadding * 2))}px;">
-                                    <div class="video-overlay-badge-row">
-                                        <span class="video-overlay-badge font-black uppercase tracking-wider px-2 py-0.5 rounded-full ${theme.videoBadgeBg}" style="font-size: ${videoBadgeSize}px; min-width: ${videoBadgeWidth}px;">
-                                            <span class="video-overlay-badge-text">${safeBadgeText} ${showNumbers ? '#' + item.id : ''}</span>
-                                        </span>
-                                    </div>
-                                    <h4 class="video-overlay-title font-extrabold ${theme.videoTextClass}" style="font-size: ${videoNameSize}px;">
-                                        ${safeName}
-                                    </h4>
-                                </div>
-
-                                ${showVideoPrice ? `<div class="video-overlay-price-wrap" style="min-width: ${videoPriceMinWidth}px; width: ${videoPriceMinWidth}px;">
-                                    <div class="video-overlay-price-label font-bold ${theme.videoLabelClass} uppercase" style="font-size: ${videoLabelSize}px;">Cena</div>
-                                    <div class="video-overlay-price font-black rounded-xl shadow-md ${theme.videoPriceBg} tracking-tight" style="font-size: ${videoPriceSize}px; width: 100%;">
-                                        <span class="video-overlay-price-text">${safePrice}</span>
-                                    </div>
-                                </div>` : ''}
-                            </div>
+                            <div id="video-preview-${item.id}" class="min-h-[72px] flex items-center justify-start"></div>
                         </div>
                     </div>
                 `;
             });
             videoGrid.innerHTML = videoHtml;
+            renderVideoPreviewCanvases();
+        }
+
+        function formatCustomItemCount(count) {
+            if (count === 1) return '1 belka';
+            const lastTwo = count % 100;
+            const last = count % 10;
+            if (last >= 2 && last <= 4 && !(lastTwo >= 12 && lastTwo <= 14)) return count + ' belki';
+            return count + ' belek';
+        }
+
+        function parseCustomBars() {
+            const rawText = (document.getElementById('customRawInput')?.value || '').trim();
+            const lines = rawText ? rawText.split('\n').filter(line => line.trim().length > 0) : [];
+            customItems = lines.map((line, idx) => {
+                const parts = line.split('|').map(part => part.trim());
+                return {
+                    id: idx + 1,
+                    chip: parts[0] || 'BELKA',
+                    title: parts[1] || parts[0] || 'Przykładowy tytuł',
+                    value: parts[2] || '',
+                    subtitle: parts[3] || ''
+                };
+            });
+            const badge = document.getElementById('customItemCountBadge');
+            if (badge) badge.textContent = formatCustomItemCount(customItems.length);
+            renderCustomBars();
+        }
+
+        function clearCustomInput() {
+            document.getElementById('customRawInput').value = '';
+            parseCustomBars();
+        }
+
+        function loadCustomDemoData(type) {
+            const map = {
+                recipes: `PRZEPIS | Lody proteinowe | 320 kcal | 24 g białka
+PRZEPIS | Omlet twarogowy | 410 kcal | 31 g białka
+PRZEPIS | Makaron z kurczakiem | 540 kcal | 38 g białka`,
+                macro: `MAKRO | Białko | 24 g | na porcję
+MAKRO | Tłuszcze | 12 g | na porcję
+MAKRO | Węglowodany | 36 g | na porcję`,
+                generic: `INFO | Premiera odcinka | Czwartek | godz. 18:00
+PROMO | Kod rabatowy | KLAMER10 | tylko do końca tygodnia
+TOP 1 | Airfryer Bites | 14,99 zł | hit tygodnia`
+            };
+            document.getElementById('customRawInput').value = map[type] || map.recipes;
+            parseCustomBars();
+        }
+
+        function getCustomBarSettings() {
+            return {
+                width: +document.getElementById('customBarWidth').value,
+                height: +document.getElementById('customBarHeight').value,
+                paddingX: +document.getElementById('customPaddingX').value,
+                paddingY: +document.getElementById('customPaddingY').value,
+                radius: +document.getElementById('customRadius').value,
+                gap: +document.getElementById('customGap').value,
+                chipWidth: +document.getElementById('customChipWidth').value,
+                rightWidth: +document.getElementById('customRightWidth').value,
+                showValue: document.getElementById('customShowValue').checked,
+                showSubtitle: document.getElementById('customShowSubtitle').checked,
+                showValueLabel: document.getElementById('customShowValueLabel').checked,
+                showChip: document.getElementById('customShowChip').checked,
+                valueLabelText: document.getElementById('customValueLabelText').value || 'WARTOŚĆ',
+                titleSize: +document.getElementById('customTitleSize').value,
+                valueSize: +document.getElementById('customValueSize').value,
+                chipTextSize: +document.getElementById('customChipTextSize').value,
+                valueLabelSize: +document.getElementById('customValueLabelSize').value,
+                subtitleSize: +document.getElementById('customSubtitleSize').value,
+                bg1: document.getElementById('customBg1').value,
+                bg2: document.getElementById('customBg2').value,
+                chipBg: document.getElementById('customChipBg').value,
+                chipColor: document.getElementById('customChipColor').value,
+                titleColor: document.getElementById('customTitleColor').value,
+                subtitleColor: document.getElementById('customSubtitleColor').value,
+                valueBg: document.getElementById('customValueBg').value,
+                valueColor: document.getElementById('customValueColor').value,
+                valueLabelColor: document.getElementById('customValueLabelColor').value,
+                valueBorder: document.getElementById('customValueBorder').value
+            };
+        }
+
+        function applyCustomBarSettings(settings) {
+            if (!settings || typeof settings !== 'object') return false;
+            const ids = {
+                width:'customBarWidth', height:'customBarHeight', paddingX:'customPaddingX', paddingY:'customPaddingY', radius:'customRadius', gap:'customGap', chipWidth:'customChipWidth', rightWidth:'customRightWidth',
+                valueLabelText:'customValueLabelText', titleSize:'customTitleSize', valueSize:'customValueSize', chipTextSize:'customChipTextSize', valueLabelSize:'customValueLabelSize', subtitleSize:'customSubtitleSize',
+                bg1:'customBg1', bg2:'customBg2', chipBg:'customChipBg', chipColor:'customChipColor', titleColor:'customTitleColor', subtitleColor:'customSubtitleColor', valueBg:'customValueBg', valueColor:'customValueColor', valueLabelColor:'customValueLabelColor', valueBorder:'customValueBorder'
+            };
+            Object.entries(ids).forEach(([k,id]) => { if (settings[k] !== undefined && document.getElementById(id)) document.getElementById(id).value = settings[k]; });
+            if (settings.showValue !== undefined) document.getElementById('customShowValue').checked = !!settings.showValue;
+            if (settings.showSubtitle !== undefined) document.getElementById('customShowSubtitle').checked = !!settings.showSubtitle;
+            if (settings.showValueLabel !== undefined) document.getElementById('customShowValueLabel').checked = !!settings.showValueLabel;
+            if (settings.showChip !== undefined) document.getElementById('customShowChip').checked = !!settings.showChip;
+            updateCustomControls();
+            return true;
+        }
+
+        function setCustomPreset(type) {
+            const presets = {
+                recipe: { width:920, height:160, paddingX:24, paddingY:20, radius:22, gap:16, chipWidth:150, rightWidth:180, showValue:true, showSubtitle:true, showValueLabel:true, showChip:true, valueLabelText:'KALORIE', titleSize:34, valueSize:30, chipTextSize:12, valueLabelSize:10, subtitleSize:16, bg1:'#0f172a', bg2:'#16a34a', chipBg:'#fbbf24', chipColor:'#111827', titleColor:'#ffffff', subtitleColor:'#dcfce7', valueBg:'#ffffff', valueColor:'#111827', valueLabelColor:'#dcfce7', valueBorder:'#bbf7d0' },
+                macro: { width:820, height:145, paddingX:24, paddingY:18, radius:20, gap:16, chipWidth:120, rightWidth:160, showValue:true, showSubtitle:true, showValueLabel:true, showChip:true, valueLabelText:'NA PORCJĘ', titleSize:30, valueSize:28, chipTextSize:12, valueLabelSize:10, subtitleSize:15, bg1:'#1e1b4b', bg2:'#7c3aed', chipBg:'#22d3ee', chipColor:'#111827', titleColor:'#ffffff', subtitleColor:'#ddd6fe', valueBg:'#ede9fe', valueColor:'#1e1b4b', valueLabelColor:'#c4b5fd', valueBorder:'#c4b5fd' },
+                generic: { width:920, height:150, paddingX:24, paddingY:18, radius:18, gap:16, chipWidth:140, rightWidth:180, showValue:true, showSubtitle:true, showValueLabel:true, showChip:true, valueLabelText:'INFO', titleSize:32, valueSize:28, chipTextSize:12, valueLabelSize:10, subtitleSize:15, bg1:'#111827', bg2:'#be185d', chipBg:'#ffffff', chipColor:'#111827', titleColor:'#ffffff', subtitleColor:'#fce7f3', valueBg:'#fbbf24', valueColor:'#111827', valueLabelColor:'#fbcfe8', valueBorder:'#f59e0b' }
+            };
+            applyCustomBarSettings(presets[type] || presets.generic);
+        }
+
+        function updateCustomControlsValues() {
+            const map = [
+                ['customBarWidth','customBarWidthVal'], ['customBarHeight','customBarHeightVal'], ['customPaddingX','customPaddingXVal'], ['customPaddingY','customPaddingYVal'], ['customRadius','customRadiusVal'], ['customGap','customGapVal'], ['customChipWidth','customChipWidthVal'], ['customRightWidth','customRightWidthVal'], ['customTitleSize','customTitleSizeVal'], ['customValueSize','customValueSizeVal'], ['customChipTextSize','customChipTextSizeVal'], ['customValueLabelSize','customValueLabelSizeVal'], ['customSubtitleSize','customSubtitleSizeVal']
+            ];
+            map.forEach(([inputId,labelId]) => {
+                const input = document.getElementById(inputId); const label = document.getElementById(labelId);
+                if (input && label) label.textContent = input.value + ' px';
+            });
+        }
+
+        function updateCustomControls() {
+            updateCustomControlsValues();
+            renderCustomBars();
+        }
+
+        function getSavedCustomTemplates() {
+            try { return JSON.parse(localStorage.getItem('custom_bar_templates_v1') || '[]'); } catch (e) { return []; }
+        }
+
+        function setSavedCustomTemplates(list) {
+            localStorage.setItem('custom_bar_templates_v1', JSON.stringify(list));
+        }
+
+        function refreshCustomTemplateSelect() {
+            const select = document.getElementById('customTemplateSelect');
+            if (!select) return;
+            const templates = getSavedCustomTemplates();
+            select.innerHTML = templates.length ? templates.map((t,i) => `<option value="${i}">${escapeHtml(t.name)}</option>`).join('') : '<option value="">Brak zapisanych szablonów</option>';
+        }
+
+        function saveCustomTemplate() {
+            const name = (document.getElementById('customTemplateName').value || '').trim();
+            if (!name) { alert('Podaj nazwę szablonu.'); return; }
+            const templates = getSavedCustomTemplates();
+            const payload = { name, settings: getCustomBarSettings() };
+            const existing = templates.findIndex(t => t.name === name);
+            if (existing >= 0) templates[existing] = payload; else templates.push(payload);
+            setSavedCustomTemplates(templates);
+            refreshCustomTemplateSelect();
+            document.getElementById('customTemplateSelect').value = String(Math.max(existing, templates.length - 1));
+            alert('Szablon został zapisany.');
+        }
+
+        function loadSelectedCustomTemplate() {
+            const select = document.getElementById('customTemplateSelect');
+            const idx = parseInt(select.value, 10);
+            const templates = getSavedCustomTemplates();
+            if (!Number.isInteger(idx) || !templates[idx]) { alert('Wybierz zapisany szablon.'); return; }
+            applyCustomBarSettings(templates[idx].settings);
+            document.getElementById('customTemplateName').value = templates[idx].name;
+        }
+
+        function deleteSelectedCustomTemplate() {
+            const select = document.getElementById('customTemplateSelect');
+            const idx = parseInt(select.value, 10);
+            const templates = getSavedCustomTemplates();
+            if (!Number.isInteger(idx) || !templates[idx]) { alert('Nie wybrano szablonu do usunięcia.'); return; }
+            const removed = templates.splice(idx,1);
+            setSavedCustomTemplates(templates);
+            refreshCustomTemplateSelect();
+            alert(`Usunięto szablon: ${removed[0].name}`);
+        }
+
+        function exportCustomTemplateSettings() {
+            const payload = { version: 1, exportedAt: new Date().toISOString(), settings: getCustomBarSettings() };
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'szablon_wlasnej_belki.json';
+            document.body.appendChild(link); link.click(); link.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        function triggerImportCustomTemplateSettings() {
+            const input = document.getElementById('customTemplateFile');
+            input.value = ''; input.click();
+        }
+
+        function handleImportCustomTemplateSettings(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                try {
+                    const parsed = JSON.parse(String(e.target.result || '{}'));
+                    const settings = parsed.settings || parsed;
+                    if (applyCustomBarSettings(settings)) alert('Wczytano szablon z pliku.');
+                    else alert('Plik nie zawiera poprawnego szablonu.');
+                } catch (error) {
+                    console.error(error);
+                    alert('Nie udało się wczytać szablonu z pliku.');
+                }
+            };
+            reader.readAsText(file, 'utf-8');
+        }
+
+        function renderCustomBars() {
+            const grid = document.getElementById('customBarsGrid');
+            if (!grid) return;
+            const font = document.getElementById('fontSelect').value;
+            grid.style.fontFamily = font;
+            if (!customItems.length) {
+                grid.innerHTML = '<div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-400 text-sm">Brak belek do wyświetlenia. Wpisz dane po lewej stronie.</div>';
+                return;
+            }
+            const s = getCustomBarSettings();
+            let html = '';
+            customItems.forEach(item => {
+                const id = `custom-bar-${item.id}`;
+                const contentWidth = s.width - (s.paddingX * 2);
+                const rightWidth = s.showValue ? s.rightWidth : 0;
+                const leftWidth = s.showValue ? Math.max(160, contentWidth - rightWidth - s.gap) : contentWidth;
+                html += `<div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+                    <div class="flex items-center justify-between gap-3">
+                        <span class="text-xs font-bold text-slate-400">Belka #${item.id}</span>
+                        <button onclick="downloadSingleCustomBar('${id}', 'Belka_${item.id}.png')" class="text-xs px-3 py-1.5 bg-fuchsia-600 hover:bg-fuchsia-500 text-white rounded-lg transition font-semibold flex items-center gap-1.5"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>Pobierz PNG</button>
+                    </div>
+                    <div class="overlay-preview-box p-3 rounded-xl flex items-center justify-start overflow-x-auto">
+                        <div id="custom-preview-${item.id}" class="min-h-[72px] flex items-center justify-start"></div>
+                    </div>
+                </div>`;
+            });
+            grid.innerHTML = html;
+            renderCustomPreviewCanvases();
+        }
+
+        async function renderVideoPreviewCanvases() {
+            if (!items.length) return;
+            for (const item of items) {
+                const holder = document.getElementById(`video-preview-${item.id}`);
+                if (!holder) continue;
+                try {
+                    const canvas = await renderOverlayToCanvas(`video-card-${item.id}`);
+                    canvas.style.width = `${canvas.width / 3}px`;
+                    canvas.style.height = `${canvas.height / 3}px`;
+                    canvas.style.display = 'block';
+                    canvas.className = 'shadow-2xl rounded-[16px]';
+                    holder.innerHTML = '';
+                    holder.appendChild(canvas);
+                } catch (error) {
+                    console.error('Błąd renderowania podglądu PNG:', error);
+                }
+            }
+        }
+
+        async function renderCustomPreviewCanvases() {
+            if (!customItems.length) return;
+            for (const item of customItems) {
+                const holder = document.getElementById(`custom-preview-${item.id}`);
+                if (!holder) continue;
+                try {
+                    const canvas = await renderCustomBarToCanvas(`custom-bar-${item.id}`);
+                    canvas.style.width = `${canvas.width / 3}px`;
+                    canvas.style.height = `${canvas.height / 3}px`;
+                    canvas.style.display = 'block';
+                    canvas.className = 'shadow-2xl rounded-[16px]';
+                    holder.innerHTML = '';
+                    holder.appendChild(canvas);
+                } catch (error) {
+                    console.error('Błąd renderowania podglądu własnej belki:', error);
+                }
+            }
+        }
+
+        async function renderCustomBarToCanvas(elementId) {
+            const match = String(elementId).match(/custom-bar-(\d+)/);
+            const itemId = match ? Number(match[1]) : null;
+            const item = customItems.find(entry => entry.id === itemId) || customItems[0];
+            if (!item) throw new Error('Nie znaleziono belki do wygenerowania PNG.');
+            if (document.fonts && document.fonts.ready) await document.fonts.ready;
+            const fontFamily = getPrimaryFontFamily();
+            const s = getCustomBarSettings();
+            const scale = 3;
+            const canvas = document.createElement('canvas');
+            canvas.width = s.width * scale;
+            canvas.height = s.height * scale;
+            const ctx = canvas.getContext('2d');
+            ctx.scale(scale, scale);
+
+            const gradient = ctx.createLinearGradient(0, 0, s.width, s.height);
+            gradient.addColorStop(0, s.bg1);
+            gradient.addColorStop(1, s.bg2);
+            ctx.save();
+            drawRoundedRect(ctx, 0, 0, s.width, s.height, s.radius);
+            ctx.clip();
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, s.width, s.height);
+            ctx.restore();
+
+            const contentWidth = s.width - (s.paddingX * 2);
+            const rightWidth = s.showValue ? s.rightWidth : 0;
+            const leftWidth = s.showValue ? Math.max(160, contentWidth - rightWidth - s.gap) : contentWidth;
+            const safeHeight = Math.max(60, s.height);
+
+            let chipHeight = 0;
+            if (s.showChip) chipHeight = Math.max(28, Math.round(s.chipTextSize * 2.1));
+
+            ctx.font = `900 ${s.titleSize}px ${fontFamily}`;
+            const titleLines = wrapCanvasText(ctx, item.title, leftWidth, 2);
+            const titleLineHeight = Math.round(s.titleSize * 1.08);
+            const titleBlockHeight = titleLines.length * titleLineHeight;
+
+            let subLines = [];
+            let subLineHeight = 0;
+            let subtitleBlockHeight = 0;
+            if (s.showSubtitle && item.subtitle) {
+                ctx.font = `700 ${s.subtitleSize}px ${fontFamily}`;
+                subLines = wrapCanvasText(ctx, item.subtitle, leftWidth, 2);
+                subLineHeight = Math.round(s.subtitleSize * 1.15);
+                subtitleBlockHeight = subLines.length * subLineHeight;
+            }
+
+            const chipGap = s.showChip ? 12 : 0;
+            const titleGap = subtitleBlockHeight > 0 ? 8 : 0;
+            const leftBlockHeight = chipHeight + chipGap + titleBlockHeight + titleGap + subtitleBlockHeight;
+            let cursorY = Math.max(s.paddingY, (safeHeight - leftBlockHeight) / 2);
+
+            if (s.showChip) {
+                ctx.fillStyle = s.chipBg;
+                drawRoundedRect(ctx, s.paddingX, cursorY, s.chipWidth, chipHeight, chipHeight / 2);
+                ctx.fill();
+                ctx.fillStyle = s.chipColor;
+                ctx.font = `900 ${s.chipTextSize}px ${fontFamily}`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(item.chip, s.paddingX + s.chipWidth / 2, cursorY + chipHeight / 2 + 0.5);
+                cursorY += chipHeight + chipGap;
+            }
+
+            ctx.fillStyle = s.titleColor;
+            ctx.font = `900 ${s.titleSize}px ${fontFamily}`;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'alphabetic';
+            titleLines.forEach((line, idx) => {
+                ctx.fillText(line, s.paddingX, cursorY + s.titleSize * 0.88 + idx * titleLineHeight);
+            });
+            cursorY += titleBlockHeight;
+
+            if (subtitleBlockHeight > 0) {
+                cursorY += titleGap;
+                ctx.fillStyle = s.subtitleColor;
+                ctx.font = `700 ${s.subtitleSize}px ${fontFamily}`;
+                subLines.forEach((line, idx) => {
+                    ctx.fillText(line, s.paddingX, cursorY + s.subtitleSize * 0.82 + idx * subLineHeight);
+                });
+            }
+
+            if (s.showValue) {
+                const rightX = s.width - s.paddingX - s.rightWidth;
+                const boxHeight = Math.max(50, Math.round(s.valueSize * 1.9));
+                const labelBlockHeight = s.showValueLabel ? s.valueLabelSize + 12 : 0;
+                const totalRightBlockHeight = labelBlockHeight + boxHeight;
+                let blockY = Math.max(s.paddingY, (safeHeight - totalRightBlockHeight) / 2);
+
+                if (s.showValueLabel) {
+                    ctx.fillStyle = s.valueLabelColor;
+                    ctx.font = `800 ${s.valueLabelSize}px ${fontFamily}`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'alphabetic';
+                    ctx.fillText(s.valueLabelText, rightX + s.rightWidth / 2, blockY + s.valueLabelSize);
+                    blockY += labelBlockHeight;
+                }
+
+                ctx.fillStyle = s.valueBg;
+                drawRoundedRect(ctx, rightX, blockY, s.rightWidth, boxHeight, Math.max(10, s.radius - 4));
+                ctx.fill();
+                ctx.strokeStyle = s.valueBorder;
+                ctx.lineWidth = 1.2;
+                drawRoundedRect(ctx, rightX, blockY, s.rightWidth, boxHeight, Math.max(10, s.radius - 4));
+                ctx.stroke();
+
+                ctx.fillStyle = s.valueColor;
+                ctx.font = `900 ${s.valueSize}px ${fontFamily}`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(item.value || '', rightX + s.rightWidth / 2, blockY + boxHeight / 2 + 1);
+            }
+
+            return canvas;
+        }
+
+        async function downloadSingleCustomBar(elementId, filename) {
+            try {
+                const canvas = await renderCustomBarToCanvas(elementId);
+                const link = document.createElement('a'); link.download = filename; link.href = canvas.toDataURL('image/png');
+                document.body.appendChild(link); link.click(); link.remove();
+                return true;
+            } catch (error) {
+                console.error(error); alert('Nie udało się wygenerować belki PNG.'); return false;
+            }
+        }
+
+        async function downloadAllCustomBars() {
+            const btn = document.getElementById('btnDownloadAllCustom');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="animate-spin">⏳</span> Generowanie ZIP...'; btn.disabled = true;
+            try {
+                if (typeof JSZip !== 'function') { alert('Nie udało się załadować modułu ZIP.'); return; }
+                if (!customItems.length) { alert('Brak belek do zapisania.'); return; }
+                const zip = new JSZip(); const folder = zip.folder('belki_custom_png');
+                for (let i = 0; i < customItems.length; i++) {
+                    btn.innerHTML = `<span class="animate-spin">⏳</span> Generowanie ${i + 1}/${customItems.length}...`;
+                    const item = customItems[i];
+                    const safeFileName = item.title.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '').substring(0, 40) || 'belka';
+                    const canvas = await renderCustomBarToCanvas(`custom-bar-${item.id}`);
+                    const blob = await new Promise((resolve, reject) => canvas.toBlob(result => result ? resolve(result) : reject(new Error('Nie udało się utworzyć PNG.')), 'image/png'));
+                    folder.file(`${String(i+1).padStart(2,'0')}_${safeFileName}.png`, blob);
+                }
+                btn.innerHTML = '<span class="animate-spin">⏳</span> Pakowanie ZIP...';
+                const zipBlob = await zip.generateAsync({ type:'blob', compression:'DEFLATE', compressionOptions:{ level:6 } });
+                const url = URL.createObjectURL(zipBlob); const link = document.createElement('a');
+                link.href = url; link.download = 'Belki_Custom.zip'; document.body.appendChild(link); link.click(); link.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            } catch (error) {
+                console.error(error); alert('Nie udało się wygenerować ZIP z belkami.');
+            } finally {
+                btn.innerHTML = originalText; btn.disabled = false;
+            }
         }
 
         function getPrimaryFontFamily() {
@@ -1989,6 +2551,20 @@ Zestaw ścisków stolarskich szybkomocujących - 15,99 zł`;
             return lines.slice(0, maxLines);
         }
 
+        function fitCanvasTextSize(ctx, text, fontFamily, startSize, maxWidth, minSize = 8, fontWeight = 900) {
+            let size = Number(startSize) || minSize;
+            const safeText = String(text || '').trim();
+            if (!safeText) return size;
+            while (size > minSize) {
+                ctx.font = `${fontWeight} ${size}px ${fontFamily}`;
+                if (ctx.measureText(safeText).width <= maxWidth) {
+                    break;
+                }
+                size -= 1;
+            }
+            return Math.max(minSize, size);
+        }
+
         async function renderOverlayToCanvas(elementId) {
             const match = String(elementId).match(/video-card-(\d+)/);
             const itemId = match ? Number(match[1]) : null;
@@ -2005,6 +2581,7 @@ Zestaw ścisków stolarskich szybkomocujących - 15,99 zł`;
             const showVideoPrice = document.getElementById('showVideoPrice').checked;
 
             const barWidth = parseInt(document.getElementById('videoBarWidth').value || '840', 10);
+            const barHeight = parseInt(document.getElementById('videoBarHeight').value || '128', 10);
             const leftWidth = parseInt(document.getElementById('videoLeftWidth').value || '560', 10);
             const badgeWidth = parseInt(document.getElementById('videoBadgeWidth').value || '130', 10);
             const priceWidth = parseInt(document.getElementById('videoPriceMinWidth').value || '130', 10);
@@ -2016,7 +2593,7 @@ Zestaw ścisków stolarskich szybkomocujących - 15,99 zł`;
             const badgeSize = parseInt(document.getElementById('videoBadgeFontSize').value || '11', 10);
             const labelSize = parseInt(document.getElementById('videoLabelFontSize').value || '10', 10);
 
-            const baseHeight = Math.max(128, padding * 2 + Math.round(nameSize * 2.7) + 24);
+            const baseHeight = Math.max(90, barHeight);
             const canvas = document.createElement('canvas');
             const scale = 3;
             canvas.width = barWidth * scale;
@@ -2047,45 +2624,54 @@ Zestaw ścisków stolarskich szybkomocujących - 15,99 zł`;
 
             const availableWidth = showVideoPrice ? Math.min(leftWidth, barWidth - padding * 2 - priceWidth - gap) : (barWidth - padding * 2);
             const badgeHeight = Math.max(28, Math.round(badgeSize * 2.05));
-            const badgeY = padding + 4;
             const badgeRadius = badgeHeight / 2;
+            const titleMaxWidth = Math.max(120, availableWidth);
+            ctx.font = `900 ${nameSize}px ${fontFamily}`;
+            const titleLines = wrapCanvasText(ctx, item.name, titleMaxWidth, 2);
+            const lineHeight = Math.round(nameSize * 1.12);
+            const titleBlockHeight = titleLines.length * lineHeight;
+            const leftBlockGap = 12;
+            const leftBlockHeight = badgeHeight + leftBlockGap + titleBlockHeight;
+            const badgeY = Math.max(padding, (baseHeight - leftBlockHeight) / 2);
 
             ctx.fillStyle = theme.badgeBg;
             drawRoundedRect(ctx, padding, badgeY, badgeWidth, badgeHeight, badgeRadius);
             ctx.fill();
 
             ctx.fillStyle = theme.badgeText;
-            ctx.font = `900 ${badgeSize}px ${fontFamily}`;
+            const fittedBadgeSize = fitCanvasTextSize(ctx, safeBadgeText, fontFamily, badgeSize, Math.max(40, badgeWidth - 18), 8, 900);
+            ctx.font = `900 ${fittedBadgeSize}px ${fontFamily}`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(safeBadgeText, padding + badgeWidth / 2, badgeY + badgeHeight / 2 + 0.5);
 
-            const titleAreaTop = badgeY + badgeHeight + 16;
-            const titleMaxWidth = Math.max(120, availableWidth);
             ctx.fillStyle = theme.titleText;
             ctx.font = `900 ${nameSize}px ${fontFamily}`;
             ctx.textAlign = 'left';
             ctx.textBaseline = 'alphabetic';
-            const titleLines = wrapCanvasText(ctx, item.name, titleMaxWidth, 2);
-            const lineHeight = Math.round(nameSize * 1.12);
-            const titleBlockHeight = titleLines.length * lineHeight;
-            const titleAreaHeight = baseHeight - titleAreaTop - padding;
-            let titleY = titleAreaTop + Math.max(0, (titleAreaHeight - titleBlockHeight) / 2) + nameSize * 0.85;
+            const titleStartY = badgeY + badgeHeight + leftBlockGap + nameSize * 0.85;
             titleLines.forEach((line, idx) => {
-                ctx.fillText(line, padding, titleY + idx * lineHeight);
+                ctx.fillText(line, padding, titleStartY + idx * lineHeight);
             });
 
             if (showVideoPrice) {
+                const innerPricePadding = 14;
+                const priceTextMaxWidth = Math.max(36, priceWidth - innerPricePadding * 2);
+                const fittedPriceSize = fitCanvasTextSize(ctx, item.price, fontFamily, priceSize, priceTextMaxWidth, 10, 900);
+                const fittedLabelSize = fitCanvasTextSize(ctx, 'CENA', fontFamily, labelSize, Math.max(30, priceWidth - 8), 8, 800);
                 const priceX = barWidth - padding - priceWidth;
-                const labelY = padding + 18;
+                const priceBoxHeight = Math.max(56, Math.round(fittedPriceSize * 1.8));
+                const labelBlockHeight = fittedLabelSize + 10;
+                const totalPriceHeight = labelBlockHeight + priceBoxHeight;
+                const labelTop = Math.max(padding, (baseHeight - totalPriceHeight) / 2);
+                const labelY = labelTop + fittedLabelSize;
                 ctx.fillStyle = theme.labelText;
-                ctx.font = `800 ${labelSize}px ${fontFamily}`;
+                ctx.font = `800 ${fittedLabelSize}px ${fontFamily}`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'alphabetic';
                 ctx.fillText('CENA', priceX + priceWidth / 2, labelY);
 
-                const priceBoxHeight = Math.max(56, Math.round(priceSize * 1.8));
-                const priceBoxY = labelY + 8;
+                const priceBoxY = labelTop + labelBlockHeight;
                 const priceRadius = Math.min(20, Math.round(priceBoxHeight / 2));
 
                 ctx.fillStyle = theme.priceBg;
@@ -2099,7 +2685,7 @@ Zestaw ścisków stolarskich szybkomocujących - 15,99 zł`;
                 }
 
                 ctx.fillStyle = theme.priceText;
-                ctx.font = `900 ${priceSize}px ${fontFamily}`;
+                ctx.font = `900 ${fittedPriceSize}px ${fontFamily}`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(item.price, priceX + priceWidth / 2, priceBoxY + priceBoxHeight / 2 + 1);
