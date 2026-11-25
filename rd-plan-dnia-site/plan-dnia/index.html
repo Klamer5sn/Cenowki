@@ -820,7 +820,7 @@ for(const faculty of FACULTY_EVENTS){if(!state.events.some(e=>e.id===faculty.id)
 try{localStorage.setItem(STORAGE,JSON.stringify(state))}catch(e){}
 let today=new Date(),selectedDate=dateStr(today),weekStart=monday(today),filter='both',autoToday=true,modalType=null,editId=null,modalKid='felek';
 const $=s=>document.querySelector(s);const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function persist(){try{localStorage.setItem(STORAGE,JSON.stringify(state));}catch(e){toast('Nie udało się zapisać zmian w tej przeglądarce.')}if(rdReady)rdCaptureChanges();}
+function persist(){try{localStorage.setItem(STORAGE,JSON.stringify(state));}catch(e){toast('Nie udało się zapisać zmian w tej przeglądarce.')}if(rdKey)rdCaptureChanges();}
 // WSPÓLNY PLAN: chroniona funkcja serwerowa + osobne tabele danych rodzinnych.
 const RD_API='https://eltrwqfyipauzvvhypbi.supabase.co/functions/v1/rd-family-sync';
 const RD_KEY_STORAGE='rd-family-private-access-v1';
@@ -897,7 +897,7 @@ function rdApplyShared(remote){
 async function rdPull(force=false){
  if(!rdKey||rdPulling||rdFlushing||rdQueue.length||!rdReady||(!force&&modalType==='form'))return;
  rdPulling=true;
- try{const remote=await rdFetch('GET');rdApplyShared(remote);rdOffline=false;rdStatus('✓ Wspólny plan zsynchronizowany');}
+ try{const remote=await rdFetch('GET');if(rdQueue.length)return;rdApplyShared(remote);rdOffline=false;rdStatus('✓ Wspólny plan zsynchronizowany');}
  catch(e){rdOffline=true;rdStatus('Brak połączenia z serwerem. Ponowię próbę.','error');console.warn('rd sync refresh',e)}
  finally{rdPulling=false}
 }
